@@ -14,7 +14,8 @@ HEADERS += \
 OTHER_FILES += \
     qml/main.qml \
     qml/Cell.qml \
-    qml/Button.qml
+    qml/Button.qml \
+    README.md
 
 RESOURCES += \
     resources.qrc

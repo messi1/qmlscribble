@@ -1,4 +1,4 @@
 qmlscribble
 ===========
 
-A simple drawing tool with QML and C++
+A simple drawing tool realized with Qt5/QML and C++
