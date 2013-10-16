@@ -10,7 +10,7 @@ DrawArea::DrawArea(QQuickItem *parent) :
 
 bool DrawArea::openImage(const QString &fileName) {
     QImage loadedImage;
-    if (!loadedImage.load(fileName))
+    if (!loadedImage.load(QUrl(fileName).toLocalFile()))
         return false;
 
     QSize newSize = loadedImage.size().expandedTo(this->size());
@@ -21,11 +21,11 @@ bool DrawArea::openImage(const QString &fileName) {
     return true;
 }
 
-bool DrawArea::saveImage(const QString &fileName, const char *fileFormat) {
+bool DrawArea::saveImage(const QString fileName, QString fileFormat) {
     QImage visibleImage = mImage;
     resizeImage(&visibleImage, this->size());
 
-    if (visibleImage.save(fileName, fileFormat)) {
+    if (visibleImage.save(fileName, fileFormat.toLatin1())) {
         mModified = false;
         return true;
     } else

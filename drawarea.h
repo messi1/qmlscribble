@@ -16,8 +16,8 @@ public:
     explicit DrawArea(QQuickItem *parent = 0);
 
     void paint(QPainter *painter);
-    bool openImage(const QString &fileName);
-    bool saveImage(const QString &fileName, const char *fileFormat);
+    Q_INVOKABLE bool openImage(const QString &fileName);
+    Q_INVOKABLE bool saveImage(const QString fileName, QString fileFormat);
     Q_INVOKABLE void clearImage();
 
 public slots:

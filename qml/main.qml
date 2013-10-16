@@ -1,9 +1,25 @@
-import QtQuick 2.0
+import QtQuick 2.1
+import QtQuick.Dialogs 1.0
 import CustomComponents 1.0
 
 Rectangle {
     id: mainWindow
     width: 640; height: 480
+
+    FileDialog {
+        id: fileDialog
+        visible: false
+        modality:  Qt.NonModal
+        title: "Choose a file"
+        selectExisting: true
+        selectMultiple: false
+        selectFolder: false
+        nameFilters: [ "Image files (*.png *.jpg)", "All files (*)" ]
+        selectedNameFilter: "Image files (*.png *.jpg)"
+        onAccepted: { myDrawingArea.openImage(fileUrl) }
+        folder: Qt.resolvedUrl(Qt.installPath)
+
+    }
 
     MouseArea {
         anchors.fill: parent
@@ -77,12 +93,33 @@ Grid {
         }
     }
 
-    Button {
-        id: clearButton
-        btnText: qsTr("Clear")
+    Column {
+        id: menu
+        property string fileName: "image_"+Qt.formatDateTime(new Date(), "hh.mm_yy.MM.dd")+".jpg"
+        property string fileFormat: "JPG"
+        spacing: 5
         anchors { top: parent.top; topMargin: 5; right: parent.right; rightMargin: 5 }
-        onClicked: myDrawingArea.clearImage()
+
+        Button {
+            id: loadButton
+            btnText: qsTr("Load")
+            onClicked: fileDialog.open()
+        }
+
+        Button {
+            id: saveButton
+            btnText: qsTr("Save")
+            onClicked: myDrawingArea.saveImage(menu.fileName, menu.fileFormat)
+        }
+
+        Button {
+            id: clearButton
+            btnText: qsTr("Clear")
+            onClicked: myDrawingArea.clearImage()
+        }
     }
+
+
 }
 
 
