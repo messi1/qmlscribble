@@ -11,13 +11,21 @@ class DrawArea : public QQuickPaintedItem
     Q_OBJECT
     Q_PROPERTY(int PenWidth READ penWidth WRITE setPenWidth)
     Q_PROPERTY(QColor PenColor READ penColor WRITE setPenColor)
+    Q_ENUMS(DrawMode)
 
 public:
     explicit DrawArea(QQuickItem *parent = 0);
 
+    enum DrawMode {
+        FREE_HAND,
+        RECTANGLE,
+        CIRCLE,
+        POLYGON
+    };
+
     void paint(QPainter *painter);
     Q_INVOKABLE bool openImage(const QString &fileName);
-    Q_INVOKABLE bool saveImage(const QString fileName, QString fileFormat);
+    Q_INVOKABLE bool saveImage(const QString &fileName, const QString& fileFormat);
     Q_INVOKABLE void clearImage();
 
 public slots:

@@ -18,7 +18,7 @@ Rectangle
     {
         id: buttonText
         anchors.fill: parent
-        color: "gray"
+        color: "#4e4e4e"
         font.pixelSize: 15
         font.bold: true
         font.family: "OpenSymbol"

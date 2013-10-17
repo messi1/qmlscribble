@@ -21,7 +21,7 @@ bool DrawArea::openImage(const QString &fileName) {
     return true;
 }
 
-bool DrawArea::saveImage(const QString fileName, QString fileFormat) {
+bool DrawArea::saveImage(const QString& fileName, const QString& fileFormat) {
     QImage visibleImage = mImage;
     resizeImage(&visibleImage, this->size());
 

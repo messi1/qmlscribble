@@ -46,11 +46,6 @@ Rectangle {
         focus: true
 
         Keys.onPressed: {
-            if (event.key === Qt.Key_C) {
-                myDrawingArea.clearImage()
-                event.accepted = true
-            }
-
             if (event.key >= Qt.Key_1 || event.key <= Qt.Key_9) {
                 myDrawingArea.PenWidth = parseInt(event.text)
                 event.accepted = true
@@ -60,10 +55,11 @@ Rectangle {
 
     Component.onCompleted: myDrawingArea.setPenWidth(3)
 
-Grid {
+Flow {
     id: colorPicker
+    width: ((parent.width*4/5)>512)? 512 :  (parent.width*4/5)
     anchors { left: parent.left; leftMargin: 5; bottom: parent.bottom; bottomMargin: 5 }
-    rows: 2; columns: 9; spacing: 5
+    spacing: 5
     property int currentItem: 0
 
     Cell { cellColor: "lightgreen";      onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=0;  unSelectCell() } }

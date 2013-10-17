@@ -1,10 +1,5 @@
 QT += qml quick
 
-bla.files = qml/QmlScribble
-bla.path = qml
-
-INSTALLS = bla
-
 SOURCES += main.cpp \
     drawarea.cpp
 
