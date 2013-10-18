@@ -26,11 +26,11 @@ public:
     void paint(QPainter *painter);
     Q_INVOKABLE bool openImage(const QString &fileName);
     Q_INVOKABLE bool saveImage(const QString &fileName, const QString& fileFormat);
-    Q_INVOKABLE void clearImage();
+    Q_INVOKABLE int penWidth();
+    Q_INVOKABLE QColor penColor();
 
 public slots:
-    int penWidth();
-    QColor penColor();
+    void clearImage();
     void setPenWidth(int newWidth);
     void setPenColor(const QColor &newColor);
     void mousePressEvent(QPoint pos);

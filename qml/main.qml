@@ -55,32 +55,32 @@ Rectangle {
 
     Component.onCompleted: myDrawingArea.setPenWidth(3)
 
-Flow {
-    id: colorPicker
-    width: ((parent.width*4/5)>512)? 512 :  (parent.width*4/5)
-    anchors { left: parent.left; leftMargin: 5; bottom: parent.bottom; bottomMargin: 5 }
-    spacing: 5
-    property int currentItem: 0
+    Flow {
+        id: colorPicker
+        width: ((parent.width*4/5)>512)? 512 :  (parent.width*4/5)
+        anchors { left: parent.left; leftMargin: 5; bottom: parent.bottom; bottomMargin: 5 }
+        spacing: 5
+        property int currentItem: 0
 
-    Cell { cellColor: "lightgreen";      onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=0;  unSelectCell() } }
-    Cell { cellColor: "greenyellow";     onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=1;  unSelectCell() } }
-    Cell { cellColor: "lime";            onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=2;  unSelectCell() } }
-    Cell { cellColor: "darkgreen";       onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=3;  unSelectCell() } }
-    Cell { cellColor: "lightblue";       onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=4;  unSelectCell() } }
-    Cell { cellColor: "steelblue";       onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=5;  unSelectCell() } }
-    Cell { cellColor: "blue";            onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=6;  unSelectCell() } }
-    Cell { cellColor: "darkblue";        onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=7;  unSelectCell() } }
-    Cell { cellColor: "black";           onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=8;  unSelectCell() } }
-    Cell { cellColor: "yellow";          onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=9;  unSelectCell() } }
-    Cell { cellColor: "gold";            onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=10; unSelectCell() } }
-    Cell { cellColor: "orange";          onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=11; unSelectCell() } }
-    Cell { cellColor: "darkorange";      onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=12; unSelectCell() } }
-    Cell { cellColor: "red";             onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=13; unSelectCell() } }
-    Cell { cellColor: "maroon";          onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=14; unSelectCell() } }
-    Cell { cellColor: "deeppink";        onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=15; unSelectCell() } }
-    Cell { cellColor: "blueviolet";      onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=16; unSelectCell() } }
-    Cell { cellColor: "purple";          onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=17; unSelectCell() } }
-}
+        Cell { cellColor: "lightgreen";      onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=0;  unSelectCell() } }
+        Cell { cellColor: "greenyellow";     onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=1;  unSelectCell() } }
+        Cell { cellColor: "lime";            onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=2;  unSelectCell() } }
+        Cell { cellColor: "darkgreen";       onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=3;  unSelectCell() } }
+        Cell { cellColor: "lightblue";       onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=4;  unSelectCell() } }
+        Cell { cellColor: "steelblue";       onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=5;  unSelectCell() } }
+        Cell { cellColor: "blue";            onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=6;  unSelectCell() } }
+        Cell { cellColor: "darkblue";        onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=7;  unSelectCell() } }
+        Cell { cellColor: "black";           onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=8;  unSelectCell() } }
+        Cell { cellColor: "yellow";          onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=9;  unSelectCell() } }
+        Cell { cellColor: "gold";            onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=10; unSelectCell() } }
+        Cell { cellColor: "orange";          onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=11; unSelectCell() } }
+        Cell { cellColor: "darkorange";      onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=12; unSelectCell() } }
+        Cell { cellColor: "red";             onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=13; unSelectCell() } }
+        Cell { cellColor: "maroon";          onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=14; unSelectCell() } }
+        Cell { cellColor: "deeppink";        onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=15; unSelectCell() } }
+        Cell { cellColor: "blueviolet";      onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=16; unSelectCell() } }
+        Cell { cellColor: "purple";          onClicked: { myDrawingArea.PenColor = cellColor; colorPicker.currentItem=17; unSelectCell() } }
+    }
 
     function unSelectCell() {
         for(var i = 0; i < colorPicker.children.length ; ++i) {
