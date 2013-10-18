@@ -1,11 +1,12 @@
 #include <QBrush>
+#include <QDebug>
 #include <QPainter>
 #include <QPointF>
 
 #include "drawarea.h"
 
 DrawArea::DrawArea(QQuickItem *parent) :
-    QQuickPaintedItem(parent), mModified(false), mScribbling(false), mPenWidth(1), mPenColor(Qt::blue)
+    QQuickPaintedItem(parent), mModified(false), mScribbling(false), mDrawMode(DA_FREEHAND),mPenWidth(1), mPenColor(Qt::blue)
 {}
 
 bool DrawArea::openImage(const QString &fileName) {
@@ -36,8 +37,13 @@ void DrawArea::setPenColor(const QColor &newColor) {
     mPenColor = newColor;
 }
 
+void DrawArea::clearOverlayImage() {
+    mOverlayImage.fill(Qt::transparent);
+    update();
+}
+
 void DrawArea::clearImage() {
-    mImage.fill(qRgb(255, 255, 255));
+    mImage.fill(Qt::transparent);
     mModified = true;
     update();
 }
@@ -55,18 +61,18 @@ void DrawArea::setPenWidth(int newWidth) {
 }
 
 void DrawArea::mousePressEvent( QPoint pos ) {
-        mLastPoint = pos;
+        mStartPoint = pos;
         mScribbling = true;
 }
 
 void DrawArea::mouseMoveEvent( QPoint pos ) {
     if( mScribbling )
-        drawLineTo(pos);
+        drawTo(pos);
 }
 
 void DrawArea::mouseReleaseEvent( QPoint pos ) {
     if( mScribbling ) {
-        drawLineTo(pos);
+        drawTo(pos);
         mScribbling = false;
     }
 }
@@ -76,8 +82,9 @@ void DrawArea::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeome
         int newWidth = qMax(int(newGeometry.width()) + 128, mImage.width());
         int newHeight = qMax(int(newGeometry.height()) + 128, mImage.height());
         resizeImage(&mImage, QSize(newWidth, newHeight));
-        update();
+        resizeImage(&mOverlayImage, QSize(newWidth, newHeight));
     }
+
     QQuickPaintedItem::geometryChanged(newGeometry, oldGeometry);
 }
 
@@ -85,10 +92,55 @@ void DrawArea::drawLineTo(const QPoint &endPoint) {
     QPainter painter(&mImage);
     int rad = (mPenWidth / 2) + 2;
     painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    painter.drawLine(mLastPoint, endPoint);
+    painter.drawLine(mStartPoint, endPoint);
     mModified = true;
-    update(QRect(mLastPoint, endPoint).normalized().adjusted(-rad, -rad, +rad, +rad));
-    mLastPoint = endPoint;
+    update(QRect(mStartPoint, endPoint).normalized().adjusted(-rad, -rad, +rad, +rad));
+
+    if(mDrawMode==DA_FREEHAND)
+        mStartPoint = endPoint;
+}
+
+void DrawArea::drawRectangle(const QPoint &/*endPoint*/)
+{
+    QPainter painter(&mOverlayImage);
+    painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+}
+
+void DrawArea::drawCircle(const QPoint &endPoint)
+{
+    QPainter painter(&mOverlayImage);
+    painter.setBrush(QBrush(mPenColor, Qt::SolidPattern));
+//    int rad = (mPenWidth / 2) + 2;
+    int startAngle = 0;
+    int spanAngle  = 5760;//Full circle
+    int radius  = (mStartPoint-endPoint).manhattanLength();
+    QRectF rectangle(mStartPoint.x()-(radius*1.414), mStartPoint.y()-(radius*1.414), 2*radius, 2*radius);
+    painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.drawArc(rectangle, startAngle, spanAngle);
+    mModified = true;
+    update(rectangle.toRect());
+}
+
+void DrawArea::drawTo(const QPoint &point)
+{
+    switch(mDrawMode)
+    {
+        default:
+        case DA_FREEHAND:
+        case DA_LINE:
+            drawLineTo(point);
+        break;
+
+        case DA_RECTANGLE:
+        break;
+
+        case DA_CIRCLE:
+            drawCircle(point);
+        break;
+
+        case DA_POLYGON:
+        break;
+    }
 }
 
 QSize DrawArea::size() const {
@@ -99,8 +151,8 @@ void DrawArea::resizeImage(QImage *image, const QSize &newSize) {
     if (image->size() == newSize)
         return;
 
-    QImage newImage(newSize, QImage::Format_RGB32);
-    newImage.fill(qRgb(255, 255, 255));
+    QImage newImage(newSize, QImage::Format_ARGB32_Premultiplied);
+    newImage.fill(Qt::transparent/*qRgb(255, 255, 255)*/);
     QPainter painter(&newImage);
     painter.drawImage(QPoint(0, 0), *image);
     *image = newImage;

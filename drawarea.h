@@ -17,10 +17,12 @@ public:
     explicit DrawArea(QQuickItem *parent = 0);
 
     enum DrawMode {
-        FREE_HAND,
-        RECTANGLE,
-        CIRCLE,
-        POLYGON
+        DA_FREEHAND,
+        DA_LINE,
+        DA_RECTANGLE,
+        DA_CIRCLE,
+        DA_POLYGON,
+        _DA_COUNT
     };
 
     void paint(QPainter *painter);
@@ -42,17 +44,23 @@ protected:
                                  const QRectF &oldGeometry);
 
 private:
+     void clearOverlayImage();
      void drawLineTo(const QPoint &endPoint);
+     void drawRectangle(const QPoint &endPoint);
+     void drawCircle(const QPoint &endPoint);
+     void drawTo(const QPoint &point);
      void resizeImage(QImage *image, const QSize &newSize);
      QSize size() const;
 
 private:
-    bool   mModified;
-    bool   mScribbling;
-    int    mPenWidth;
-    QColor mPenColor;
-    QImage mImage;
-    QPoint mLastPoint;
+    bool     mModified;
+    bool     mScribbling;
+    DrawMode mDrawMode;
+    int      mPenWidth;
+    QColor   mPenColor;
+    QImage   mImage;
+    QImage   mOverlayImage;
+    QPoint   mStartPoint;
 };
 
 #endif // DRAWAREA_H
