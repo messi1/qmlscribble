@@ -45,10 +45,10 @@ protected:
 
 private:
      void clearOverlayImage();
-     void drawLineTo(const QPoint &endPoint);
-     void drawRectangle(const QPoint &endPoint);
-     void drawCircle(const QPoint &endPoint);
-     void drawTo(const QPoint &point);
+     void drawLineTo(const QPoint &endPoint, bool final);
+     void drawRectangle(const QPoint &endPoint, bool final);
+     void drawCircle(const QPoint &endPoint, bool final);
+     void drawTo(const QPoint &point, bool final);
      void resizeImage(QImage *image, const QSize &newSize);
      QSize size() const;
 
@@ -61,6 +61,7 @@ private:
     QImage   mImage;
     QImage   mOverlayImage;
     QPoint   mStartPoint;
+    QRectF   mPrevRect;
 };
 
 #endif // DRAWAREA_H

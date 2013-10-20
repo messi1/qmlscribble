@@ -6,7 +6,7 @@
 #include "drawarea.h"
 
 DrawArea::DrawArea(QQuickItem *parent) :
-    QQuickPaintedItem(parent), mModified(false), mScribbling(false), mDrawMode(DA_FREEHAND),mPenWidth(1), mPenColor(Qt::blue)
+    QQuickPaintedItem(parent), mModified(false), mScribbling(false), mDrawMode(DA_CIRCLE),mPenWidth(1), mPenColor(Qt::blue)
 {}
 
 bool DrawArea::openImage(const QString &fileName) {
@@ -46,6 +46,7 @@ void DrawArea::clearImage() {
     mImage.fill(Qt::transparent);
     mModified = true;
     update();
+    clearOverlayImage();
 }
 
 int DrawArea::penWidth() {
@@ -67,12 +68,15 @@ void DrawArea::mousePressEvent( QPoint pos ) {
 
 void DrawArea::mouseMoveEvent( QPoint pos ) {
     if( mScribbling )
-        drawTo(pos);
+    {
+        clearOverlayImage();
+        drawTo(pos, false);
+    }
 }
 
 void DrawArea::mouseReleaseEvent( QPoint pos ) {
     if( mScribbling ) {
-        drawTo(pos);
+        drawTo(pos, true);
         mScribbling = false;
     }
 }
@@ -88,54 +92,87 @@ void DrawArea::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeome
     QQuickPaintedItem::geometryChanged(newGeometry, oldGeometry);
 }
 
-void DrawArea::drawLineTo(const QPoint &endPoint) {
-    QPainter painter(&mImage);
-    int rad = (mPenWidth / 2) + 2;
-    painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    painter.drawLine(mStartPoint, endPoint);
-    mModified = true;
+void DrawArea::drawLineTo(const QPoint &endPoint, bool final) {
+    int rad = 0;
+    rad = (mPenWidth / 2) + 2;
+
+    if(final)
+    {
+        QPainter painter(&mImage);
+        painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter.drawLine(mStartPoint, endPoint);
+        mModified = true;
+    }
+    else
+    {
+        QPainter painter(&mOverlayImage);
+        rad = (mPenWidth / 2) + 2;
+        painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter.drawLine(mStartPoint, endPoint);
+    }
+
     update(QRect(mStartPoint, endPoint).normalized().adjusted(-rad, -rad, +rad, +rad));
 
     if(mDrawMode==DA_FREEHAND)
         mStartPoint = endPoint;
 }
 
-void DrawArea::drawRectangle(const QPoint &/*endPoint*/)
+void DrawArea::drawRectangle(const QPoint &/*endPoint*/, bool final)
 {
     QPainter painter(&mOverlayImage);
     painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }
 
-void DrawArea::drawCircle(const QPoint &endPoint)
+void DrawArea::drawCircle(const QPoint &endPoint, bool final)
 {
-    QPainter painter(&mOverlayImage);
-    painter.setBrush(QBrush(mPenColor, Qt::SolidPattern));
-//    int rad = (mPenWidth / 2) + 2;
     int startAngle = 0;
     int spanAngle  = 5760;//Full circle
     int radius  = (mStartPoint-endPoint).manhattanLength();
-    QRectF rectangle(mStartPoint.x()-(radius*1.414), mStartPoint.y()-(radius*1.414), 2*radius, 2*radius);
-    painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    painter.drawArc(rectangle, startAngle, spanAngle);
-    mModified = true;
-    update(rectangle.toRect());
+    int rad = 0;
+    rad = (mPenWidth / 2) + 2;
+    QRectF rectangle(mStartPoint.x()-(radius*1.414), mStartPoint.y()-(radius*1.415), 2*radius, 2*radius);
+
+    if(final)
+    {
+        QPainter painter(&mImage);
+        painter.setBrush(QBrush(mPenColor, Qt::SolidPattern));
+        painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter.drawArc(rectangle, startAngle, spanAngle);
+        mModified = true;
+
+    }
+    else
+    {
+        QPainter painter(&mOverlayImage);
+        painter.setBrush(QBrush(mPenColor, Qt::SolidPattern));
+        painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter.drawArc(rectangle, startAngle, spanAngle);
+    }
+
+    update(rectangle.united(mPrevRect).toRect().adjusted(-5,-5,5,5));
+
+    mPrevRect = rectangle;
 }
 
-void DrawArea::drawTo(const QPoint &point)
+void DrawArea::drawTo(const QPoint &point, bool final)
 {
     switch(mDrawMode)
     {
         default:
         case DA_FREEHAND:
+            drawLineTo(point, true);
+        break;
+
         case DA_LINE:
-            drawLineTo(point);
+            drawLineTo(point, final);
         break;
 
         case DA_RECTANGLE:
+            drawRectangle(point, final);
         break;
 
         case DA_CIRCLE:
-            drawCircle(point);
+            drawCircle(point, final);
         break;
 
         case DA_POLYGON:
@@ -159,5 +196,7 @@ void DrawArea::resizeImage(QImage *image, const QSize &newSize) {
 }
 
 void DrawArea::paint(QPainter *painter) {
+
     painter->drawImage(boundingRect(), mImage, boundingRect());
+    painter->drawImage(boundingRect(), mOverlayImage, boundingRect());
 }
