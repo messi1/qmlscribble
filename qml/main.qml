@@ -46,10 +46,22 @@ Rectangle {
         focus: true
 
         Keys.onPressed: {
-            if (event.key >= Qt.Key_1 || event.key <= Qt.Key_9) {
+            if (event.key >= Qt.Key_1 && event.key <= Qt.Key_9) {
                 myDrawingArea.PenWidth = parseInt(event.text)
                 event.accepted = true
             }
+
+            if (event.key=== Qt.Key_C)
+                myDrawingArea.setDrawMode(DrawArea.DA_CIRCLE);
+
+            if (event.key=== Qt.Key_R)
+                myDrawingArea.setDrawMode(DrawArea.DA_RECTANGLE);
+
+            if (event.key=== Qt.Key_L)
+                myDrawingArea.setDrawMode(DrawArea.DA_LINE);
+
+            if (event.key=== Qt.Key_F)
+                myDrawingArea.setDrawMode(DrawArea.DA_FREEHAND);
         }
     }
 
@@ -91,8 +103,8 @@ Rectangle {
 
     Column {
         id: menu
-        property string fileName: "image_"+Qt.formatDateTime(new Date(), "hh.mm_yy.MM.dd")+".jpg"
-        property string fileFormat: "JPG"
+        property string fileName: "image_"+Qt.formatDateTime(new Date(), "hh.mm_yy.MM.dd")+".png"
+        property string fileFormat: "PNG"
         spacing: 5
         anchors { top: parent.top; topMargin: 5; right: parent.right; rightMargin: 5 }
 

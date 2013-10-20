@@ -6,7 +6,7 @@
 #include "drawarea.h"
 
 DrawArea::DrawArea(QQuickItem *parent) :
-    QQuickPaintedItem(parent), mModified(false), mScribbling(false), mDrawMode(DA_CIRCLE),mPenWidth(1), mPenColor(Qt::blue)
+    QQuickPaintedItem(parent), mModified(false), mScribbling(false), mDrawMode(DA_FREEHAND),mPenWidth(1), mPenColor(Qt::blue)
 {}
 
 bool DrawArea::openImage(const QString &fileName) {
@@ -35,6 +35,12 @@ bool DrawArea::saveImage(const QString& fileName, const QString& fileFormat) {
 
 void DrawArea::setPenColor(const QColor &newColor) {
     mPenColor = newColor;
+}
+
+void DrawArea::setDrawMode(DrawArea::DrawMode mode)
+{
+    if(mode < _DA_COUNT)
+        mDrawMode = mode;
 }
 
 void DrawArea::clearOverlayImage() {
@@ -78,6 +84,7 @@ void DrawArea::mouseReleaseEvent( QPoint pos ) {
     if( mScribbling ) {
         drawTo(pos, true);
         mScribbling = false;
+        clearOverlayImage();
     }
 }
 
@@ -93,63 +100,72 @@ void DrawArea::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeome
 }
 
 void DrawArea::drawLineTo(const QPoint &endPoint, bool final) {
-    int rad = 0;
-    rad = (mPenWidth / 2) + 2;
+    QPainter painter;
+    int rad = (mPenWidth / 2) + 2;
 
     if(final)
     {
-        QPainter painter(&mImage);
-        painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter.drawLine(mStartPoint, endPoint);
+        painter.begin(&mImage);
         mModified = true;
     }
     else
-    {
-        QPainter painter(&mOverlayImage);
-        rad = (mPenWidth / 2) + 2;
-        painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter.drawLine(mStartPoint, endPoint);
-    }
+        painter.begin(&mOverlayImage);
 
-    update(QRect(mStartPoint, endPoint).normalized().adjusted(-rad, -rad, +rad, +rad));
+    painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.drawLine(mStartPoint, endPoint);
+
+    update(QRectF(mStartPoint, endPoint).united(mPrevRect).toRect().normalized().adjusted(-rad, -rad, +rad, +rad));
+
+    mPrevRect = QRectF(mStartPoint, endPoint);
 
     if(mDrawMode==DA_FREEHAND)
         mStartPoint = endPoint;
 }
 
-void DrawArea::drawRectangle(const QPoint &/*endPoint*/, bool final)
+void DrawArea::drawRectangle(const QPoint &endPoint, bool final)
 {
-    QPainter painter(&mOverlayImage);
+    QPainter painter;
+    int rad = (mPenWidth / 2) + 2;
+    QRectF rectangle(qMin(endPoint.x(),mStartPoint.x()), qMin(endPoint.y(),mStartPoint.y()),
+                     qAbs(endPoint.x()-mStartPoint.x()), qAbs(endPoint.y()-mStartPoint.y()));
+
+    if(final)
+    {
+        painter.begin(&mImage);
+        mModified = true;
+    }
+    else
+        painter.begin(&mOverlayImage);
+
+    painter.setBrush(QBrush(mPenColor, Qt::SolidPattern));
     painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.drawRect(rectangle);
+
+    update(rectangle.united(mPrevRect).toRect().normalized().adjusted(-rad, -rad, +rad, +rad));
+
+    mPrevRect = rectangle;
 }
 
 void DrawArea::drawCircle(const QPoint &endPoint, bool final)
 {
-    int startAngle = 0;
-    int spanAngle  = 5760;//Full circle
+    QPainter painter;
     int radius  = (mStartPoint-endPoint).manhattanLength();
-    int rad = 0;
-    rad = (mPenWidth / 2) + 2;
+    int rad = (mPenWidth / 2) + 2;
     QRectF rectangle(mStartPoint.x()-(radius*1.414), mStartPoint.y()-(radius*1.415), 2*radius, 2*radius);
 
     if(final)
     {
-        QPainter painter(&mImage);
-        painter.setBrush(QBrush(mPenColor, Qt::SolidPattern));
-        painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter.drawArc(rectangle, startAngle, spanAngle);
+        painter.begin(&mImage);
         mModified = true;
-
     }
     else
-    {
-        QPainter painter(&mOverlayImage);
-        painter.setBrush(QBrush(mPenColor, Qt::SolidPattern));
-        painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter.drawArc(rectangle, startAngle, spanAngle);
-    }
+        painter.begin(&mOverlayImage);
 
-    update(rectangle.united(mPrevRect).toRect().adjusted(-5,-5,5,5));
+    painter.setBrush(QBrush(mPenColor, Qt::SolidPattern));
+    painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.drawEllipse(rectangle);
+
+    update(rectangle.united(mPrevRect).toRect().normalized().adjusted(-rad, -rad, +rad, +rad));
 
     mPrevRect = rectangle;
 }

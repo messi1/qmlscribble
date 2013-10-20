@@ -35,6 +35,7 @@ public slots:
     void clearImage();
     void setPenWidth(int newWidth);
     void setPenColor(const QColor &newColor);
+    void setDrawMode(DrawMode mode);
     void mousePressEvent(QPoint pos);
     void mouseMoveEvent(QPoint pos);
     void mouseReleaseEvent(QPoint pos);
