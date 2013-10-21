@@ -149,9 +149,9 @@ void DrawArea::drawRectangle(const QPoint &endPoint, bool final)
 void DrawArea::drawCircle(const QPoint &endPoint, bool final)
 {
     QPainter painter;
-    int radius  = (mStartPoint-endPoint).manhattanLength();
+    int radius  = qAbs((mStartPoint-endPoint).manhattanLength());
     int rad = (mPenWidth / 2) + 2;
-    QRectF rectangle(mStartPoint.x()-(radius*1.414), mStartPoint.y()-(radius*1.415), 2*radius, 2*radius);
+    QRectF rectangle(mStartPoint.x()-(radius*1.414), mStartPoint.y()-(radius*1.414), 2*radius, 2*radius);
 
     if(final)
     {
