@@ -7,7 +7,10 @@
 
 DrawArea::DrawArea(QQuickItem *parent) :
     QQuickPaintedItem(parent), mModified(false), mScribbling(false), mDrawMode(DA_FREEHAND),mPenWidth(1), mPenColor(Qt::blue)
-{}
+{
+    setAcceptedMouseButtons(Qt::AllButtons);
+//    setRenderTarget(QQuickPaintedItem::FramebufferObject);
+}
 
 bool DrawArea::openImage(const QString &fileName) {
     QImage loadedImage;
@@ -83,6 +86,30 @@ void DrawArea::mouseMoveEvent( QPoint pos ) {
 void DrawArea::mouseReleaseEvent( QPoint pos ) {
     if( mScribbling ) {
         drawTo(pos, true);
+        mScribbling = false;
+        clearOverlayImage();
+    }
+}
+
+void DrawArea::mousePressEvent(QMouseEvent *event)
+{
+    mStartPoint = event->pos();
+    mScribbling = true;
+}
+
+void DrawArea::mouseMoveEvent(QMouseEvent *event)
+{
+    if( mScribbling )
+    {
+        clearOverlayImage();
+        drawTo(event->pos(), false);
+    }
+}
+
+void DrawArea::mouseReleaseEvent(QMouseEvent *event)
+{
+    if( mScribbling ) {
+        drawTo(event->pos(), true);
         mScribbling = false;
         clearOverlayImage();
     }

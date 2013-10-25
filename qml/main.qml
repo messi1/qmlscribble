@@ -4,41 +4,22 @@ import CustomComponents 1.0
 
 Rectangle {
     id: mainWindow
-    width: 640; height: 480
+    width: 1024; height: 600
 
-    FileDialog {
-        id: fileDialog
-        visible: false
-        modality:  Qt.NonModal
-        title: "Choose a file"
-        selectExisting: true
-        selectMultiple: false
-        selectFolder: false
-        nameFilters: [ "Image files (*.png *.jpg)", "All files (*)" ]
-        selectedNameFilter: "Image files (*.png *.jpg)"
-        onAccepted: { myDrawingArea.openImage(fileUrl) }
-        folder: Qt.resolvedUrl(Qt.installPath)
+//    FileDialog {
+//        id: fileDialog
+//        visible: false
+//        modality:  Qt.NonModal
+//        title: "Choose a file"
+//        selectExisting: true
+//        selectMultiple: false
+//        selectFolder: false
+//        nameFilters: [ "Image files (*.png *.jpg)", "All files (*)" ]
+//        selectedNameFilter: "Image files (*.png *.jpg)"
+//        onAccepted: { myDrawingArea.openImage(fileUrl) }
+//        folder: Qt.resolvedUrl(Qt.installPath)
 
-    }
-
-    MouseArea {
-        anchors.fill: parent
-
-        onPressed: {
-            if (mouse.button == Qt.LeftButton)
-                        myDrawingArea.mousePressEvent(Qt.point(mouseX, mouseY))
-        }
-
-        onPositionChanged: {
-            if (pressedButtons == Qt.LeftButton)
-                               myDrawingArea.mouseMoveEvent(Qt.point(mouseX, mouseY))
-        }
-
-        onReleased: {
-            if (mouse.button == Qt.LeftButton)
-                        myDrawingArea.mouseReleaseEvent(Qt.point(mouseX, mouseY))
-        }
-    }
+//    }
 
     DrawArea  {
         id: myDrawingArea
@@ -63,13 +44,32 @@ Rectangle {
             if (event.key=== Qt.Key_F)
                 myDrawingArea.setDrawMode(DrawArea.DA_FREEHAND);
         }
+
+//        MouseArea {
+//            anchors.fill: parent
+
+//            onPressed: {
+//                if (mouse.button == Qt.LeftButton)
+//                            myDrawingArea.mousePressEvent(Qt.point(mouseX, mouseY))
+//            }
+
+//            onPositionChanged: {
+//                if (pressedButtons == Qt.LeftButton)
+//                                   myDrawingArea.mouseMoveEvent(Qt.point(mouseX, mouseY))
+//            }
+
+//            onReleased: {
+//                if (mouse.button == Qt.LeftButton)
+//                            myDrawingArea.mouseReleaseEvent(Qt.point(mouseX, mouseY))
+//            }
+//        }
     }
 
     Component.onCompleted: myDrawingArea.setPenWidth(3)
 
     Flow {
         id: colorPicker
-        width: ((parent.width*4/5)>512)? 512 :  (parent.width*4/5)
+        width: ((parent.width*4/5)>700)? 700 :  (parent.width*4/5)
         anchors { left: parent.left; leftMargin: 5; bottom: parent.bottom; bottomMargin: 5 }
         spacing: 5
         property int currentItem: 0
@@ -106,7 +106,13 @@ Rectangle {
         property string fileName: "image_"+Qt.formatDateTime(new Date(), "hh.mm_yy.MM.dd")+".png"
         property string fileFormat: "PNG"
         spacing: 5
-        anchors { top: parent.top; topMargin: 5; right: parent.right; rightMargin: 5 }
+        anchors { top: parent.top; topMargin: 200; right: parent.right; rightMargin: 5 }
+
+        Button {
+            id: quitButton
+            btnText: qsTr("Quit")
+            onClicked: Qt.quit()
+        }
 
         Button {
             id: loadButton

@@ -5,8 +5,8 @@ Rectangle
     property alias btnText: buttonText.text
 
     id: button
-    width: 70
-    height: 30
+    width: 80
+    height: 60
     color: "lightgray"
     border.width: 1
     border.color: "#4e4e4e"

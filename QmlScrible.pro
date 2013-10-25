@@ -1,5 +1,7 @@
 QT += qml quick
 
+CONFIG+=qml_debug
+
 SOURCES += main.cpp \
     drawarea.cpp
 

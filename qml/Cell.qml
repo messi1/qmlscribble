@@ -6,7 +6,7 @@ Item {
     property alias cellBorder: rectangle.border
     signal clicked(color cellColor)
 
-    width: 50; height: 30
+    width: 80; height: 60
 
     Rectangle {
         id: rectangle
