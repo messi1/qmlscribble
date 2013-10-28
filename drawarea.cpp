@@ -36,19 +36,14 @@ bool DrawArea::saveImage(const QString& fileName, const QString& fileFormat) {
         return false;
 }
 
-void DrawArea::setPenColor(const QColor &newColor) {
+void DrawArea::setPenColor(const QColor &newColor)
+{
     mPenColor = newColor;
 }
 
-void DrawArea::setDrawMode(DrawArea::DrawMode mode)
+void DrawArea::setPenWidth(int newWidth)
 {
-    if(mode < _DA_COUNT)
-        mDrawMode = mode;
-}
-
-void DrawArea::clearOverlayImage() {
-    mOverlayImage.fill(Qt::transparent);
-    update();
+    mPenWidth = newWidth;
 }
 
 void DrawArea::clearImage() {
@@ -58,61 +53,38 @@ void DrawArea::clearImage() {
     clearOverlayImage();
 }
 
-int DrawArea::penWidth() {
-    return mPenWidth;
-}
-
-QColor DrawArea::penColor() {
-    return mPenColor;
-}
-
-void DrawArea::setPenWidth(int newWidth) {
-    mPenWidth = newWidth;
-}
-
-void DrawArea::mousePressEvent( QPoint pos ) {
-        mStartPoint = pos;
-        mScribbling = true;
-}
-
-void DrawArea::mouseMoveEvent( QPoint pos ) {
-    if( mScribbling )
-    {
-        clearOverlayImage();
-        drawTo(pos, false);
-    }
-}
-
-void DrawArea::mouseReleaseEvent( QPoint pos ) {
-    if( mScribbling ) {
-        drawTo(pos, true);
-        mScribbling = false;
-        clearOverlayImage();
-    }
-}
-
 void DrawArea::mousePressEvent(QMouseEvent *event)
 {
-    mStartPoint = event->pos();
-    mScribbling = true;
+	if (event->button() == Qt::LeftButton) {
+    	mStartPoint = event->pos();
+   		mScribbling = true;
+	}
 }
 
 void DrawArea::mouseMoveEvent(QMouseEvent *event)
 {
-    if( mScribbling )
+    if((event->buttons() & Qt::LeftButton) && mScribbling )
     {
-        clearOverlayImage();
+        //clearOverlayImage();
         drawTo(event->pos(), false);
     }
 }
 
 void DrawArea::mouseReleaseEvent(QMouseEvent *event)
 {
-    if( mScribbling ) {
+     if (event->button() == Qt::LeftButton && mScribbling ) {
         drawTo(event->pos(), true);
         mScribbling = false;
-        clearOverlayImage();
     }
+}
+
+void DrawArea::paint(QPainter *painter) {
+
+//    painter->setRenderHints(QPainter::HighQualityAntialiasing);
+    painter->drawImage(mCurrRect, mImage, mCurrRect);
+//    painter->drawImage(boundingRect(), mOverlayImage, boundingRect());
+//    painter->drawImage(boundingRect(), mImage, boundingRect());
+//    painter->drawImage(boundingRect(), mOverlayImage, boundingRect());
 }
 
 void DrawArea::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry) {
@@ -139,21 +111,25 @@ void DrawArea::drawLineTo(const QPoint &endPoint, bool final) {
         painter.begin(&mOverlayImage);
 
     painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    painter.drawLine(mStartPoint, endPoint);
 
-    update(QRectF(mStartPoint, endPoint).united(mPrevRect).toRect().normalized().adjusted(-rad, -rad, +rad, +rad));
+    if(boundingRect().toRect().contains(endPoint))
+    {
+        painter.drawLine(mStartPoint, endPoint);
 
-    mPrevRect = QRectF(mStartPoint, endPoint);
+        mCurrRect = QRect(mStartPoint, endPoint).normalized().adjusted(-rad, -rad, +rad, +rad);
+        update(mCurrRect);
+        mPrevRect = mCurrRect;
 
-    if(mDrawMode==DA_FREEHAND)
-        mStartPoint = endPoint;
+        if(mDrawMode==DA_FREEHAND)
+            mStartPoint = endPoint;
+    }
 }
 
 void DrawArea::drawRectangle(const QPoint &endPoint, bool final)
 {
     QPainter painter;
     int rad = (mPenWidth / 2) + 2;
-    QRectF rectangle(qMin(endPoint.x(),mStartPoint.x()), qMin(endPoint.y(),mStartPoint.y()),
+    QRect rectangle(qMin(endPoint.x(),mStartPoint.x()), qMin(endPoint.y(),mStartPoint.y()),
                      qAbs(endPoint.x()-mStartPoint.x()), qAbs(endPoint.y()-mStartPoint.y()));
 
     if(final)
@@ -168,7 +144,7 @@ void DrawArea::drawRectangle(const QPoint &endPoint, bool final)
     painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter.drawRect(rectangle);
 
-    update(rectangle.united(mPrevRect).toRect().normalized().adjusted(-rad, -rad, +rad, +rad));
+    update(rectangle.united(mPrevRect).normalized().adjusted(-rad, -rad, +rad, +rad));
 
     mPrevRect = rectangle;
 }
@@ -178,7 +154,7 @@ void DrawArea::drawCircle(const QPoint &endPoint, bool final)
     QPainter painter;
     int radius  = qAbs((mStartPoint-endPoint).manhattanLength());
     int rad = (mPenWidth / 2) + 2;
-    QRectF rectangle(mStartPoint.x()-(radius*1.414), mStartPoint.y()-(radius*1.414), 2*radius, 2*radius);
+    QRect rectangle(mStartPoint.x()-(radius*1.414), mStartPoint.y()-(radius*1.414), 2*radius, 2*radius);
 
     if(final)
     {
@@ -192,7 +168,7 @@ void DrawArea::drawCircle(const QPoint &endPoint, bool final)
     painter.setPen(QPen(mPenColor, mPenWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter.drawEllipse(rectangle);
 
-    update(rectangle.united(mPrevRect).toRect().normalized().adjusted(-rad, -rad, +rad, +rad));
+    update(rectangle.united(mPrevRect).normalized().adjusted(-rad, -rad, +rad, +rad));
 
     mPrevRect = rectangle;
 }
@@ -232,14 +208,40 @@ void DrawArea::resizeImage(QImage *image, const QSize &newSize) {
         return;
 
     QImage newImage(newSize, QImage::Format_ARGB32_Premultiplied);
-    newImage.fill(Qt::transparent/*qRgb(255, 255, 255)*/);
+    newImage.fill(Qt::transparent);
     QPainter painter(&newImage);
     painter.drawImage(QPoint(0, 0), *image);
     *image = newImage;
 }
 
-void DrawArea::paint(QPainter *painter) {
+void DrawArea::setDrawMode(DrawArea::DrawMode mode)
+{
+    if(mode < _DA_COUNT)
+        mDrawMode = mode;
+}
 
-    painter->drawImage(boundingRect(), mImage, boundingRect());
-    painter->drawImage(boundingRect(), mOverlayImage, boundingRect());
+void DrawArea::clearOverlayImage() {
+    mOverlayImage.fill(Qt::transparent);
+    update();
+}
+
+void DrawArea::mousePressEvent( QPoint pos ) {
+        mStartPoint = pos;
+        mScribbling = true;
+}
+
+void DrawArea::mouseMoveEvent( QPoint pos ) {
+    if( mScribbling )
+    {
+        clearOverlayImage();
+        drawTo(pos, false);
+    }
+}
+
+void DrawArea::mouseReleaseEvent( QPoint pos ) {
+    if( mScribbling ) {
+        drawTo(pos, true);
+        mScribbling = false;
+        clearOverlayImage();
+    }
 }

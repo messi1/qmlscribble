@@ -6,22 +6,22 @@ Rectangle {
     id: mainWindow
     width: 1024; height: 600
 
-//    FileDialog {
-//        id: fileDialog
-//        visible: false
-//        modality:  Qt.NonModal
-//        title: "Choose a file"
-//        selectExisting: true
-//        selectMultiple: false
-//        selectFolder: false
-//        nameFilters: [ "Image files (*.png *.jpg)", "All files (*)" ]
-//        selectedNameFilter: "Image files (*.png *.jpg)"
-//        onAccepted: { myDrawingArea.openImage(fileUrl) }
-//        folder: Qt.resolvedUrl(Qt.installPath)
+    FileDialog {
+        id: fileDialog
+        visible: false
+        modality:  Qt.NonModal
+        title: "Choose a file"
+        selectExisting: true
+        selectMultiple: false
+        selectFolder: false
+        nameFilters: [ "Image files (*.png *.jpg)", "All files (*)" ]
+        selectedNameFilter: "Image files (*.png *.jpg)"
+        onAccepted: { myDrawingArea.openImage(fileUrl) }
+        folder: Qt.resolvedUrl(Qt.installPath)
 
-//    }
+    }
 
-    DrawArea  {
+    ScribbleArea  {
         id: myDrawingArea
         anchors.fill: parent
         focus: true
@@ -69,7 +69,7 @@ Rectangle {
 
     Flow {
         id: colorPicker
-        width: ((parent.width*4/5)>700)? 700 :  (parent.width*4/5)
+        width: ((parent.width*4/5)>800)? 800 :  (parent.width*4/5)
         anchors { left: parent.left; leftMargin: 5; bottom: parent.bottom; bottomMargin: 5 }
         spacing: 5
         property int currentItem: 0
@@ -106,7 +106,7 @@ Rectangle {
         property string fileName: "image_"+Qt.formatDateTime(new Date(), "hh.mm_yy.MM.dd")+".png"
         property string fileFormat: "PNG"
         spacing: 5
-        anchors { top: parent.top; topMargin: 200; right: parent.right; rightMargin: 5 }
+        anchors { bottom: parent.bottom; bottomMargin: 5; right: parent.right; rightMargin: 5 }
 
         Button {
             id: quitButton

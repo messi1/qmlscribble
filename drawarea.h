@@ -28,8 +28,8 @@ public:
     void paint(QPainter *painter);
     Q_INVOKABLE bool openImage(const QString &fileName);
     Q_INVOKABLE bool saveImage(const QString &fileName, const QString& fileFormat);
-    Q_INVOKABLE int penWidth();
-    Q_INVOKABLE QColor penColor();
+    Q_INVOKABLE int penWidth() { return mPenWidth; }
+    Q_INVOKABLE QColor penColor() { return mPenColor; }
 
 public slots:
     void clearImage();
@@ -65,7 +65,8 @@ private:
     QImage   mImage;
     QImage   mOverlayImage;
     QPoint   mStartPoint;
-    QRectF   mPrevRect;
+    QRect    mCurrRect;
+    QRect    mPrevRect;
 };
 
 #endif // DRAWAREA_H
